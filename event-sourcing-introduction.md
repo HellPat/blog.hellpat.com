@@ -1,4 +1,6 @@
-# Event-Sourcing: A Different Way to Model State
+# Growing Marijuana with Event-Sourcing (Part 1)
+
+*Part 1 of the Event-Sourcing Series*
 
 ## The Story of My Plant
 
@@ -10,53 +12,19 @@ Today, I checked on Lucky. The leaves are yellowing, the stem is thin, and it's 
 
 ## CRUD: The Traditional Approach
 
-Let's model Lucky in our plant tracking application using CRUD (Create, Read, Update, Delete):
+In a traditional CRUD database, I track Lucky like this:
 
-```typescript
-interface Plant {
-  id: string;
-  ownerId: string;
-  height: number;
-  health: number;
-  lastWatered: Date;
-  trimCount: number;
-  isHarvested: boolean;
-}
+| id | ownerId | height | health | lastWatered | trimCount |
+|----|---------|--------|--------|-------------|-----------|
+| plant-1 | me | 15 | 30 | 2023-10-15 | 0 |
 
-class PlantRepository {
-  async update(plant: Plant): Promise<void> {
-    // Just overwrite the current state
-    await database.save(plant);
-  }
-}
-```
+When I water Lucky, I update the row:
 
-Every time I water Lucky, I update the record:
+| id | ownerId | height | health | lastWatered | trimCount |
+|----|---------|--------|--------|-------------|-----------|
+| plant-1 | me | 15 | 35 | 2023-10-30 | 0 |
 
-```typescript
-const lucky: Plant = {
-  id: "plant-1",
-  ownerId: "me",
-  height: 15,
-  health: 30,
-  lastWatered: new Date("2023-10-15"),
-  trimCount: 0,
-  isHarvested: false
-};
-
-// When I water Lucky
-await plantRepository.update({
-  ...lucky,
-  lastWatered: new Date(),
-  health: 35
-});
-```
-
-Looking at Lucky's current state, I can see:
-- Health: 30 (not great)
-- Height: 15cm (stunted growth)
-- Last watered: October 15th
-- Never been trimmed
+The old values are gone. Overwritten.
 
 ### The Question CRUD Cannot Answer
 
@@ -70,13 +38,13 @@ I can see Lucky is in poor condition, but I cannot answer:
 
 With CRUD, I only have a snapshot of Lucky's current state. The history is gone—overwritten with each update. I can't debug the problem because I don't know *how* Lucky got to this state.
 
-## Enter: Event-Sourcing
+## My Grandma Did Better
 
 Then I visited my grandma. She also grows a marijuana plant—same strain, planted on the same day as Lucky. But her plant is magnificent: 45cm tall, lush green leaves, vibrant and healthy.
 
 "How do you do it, Grandma?" I asked.
 
-She pulled out a small notebook. "I keep track of everything," she said. "Every time I water it, trim it, or do anything—I write it down with the date."
+She smiled and pulled out a small notebook. "I keep track of everything," she said. "Every time I water it, trim it, or do anything—I write it down with the date."
 
 Her notebook looked like this:
 
@@ -93,7 +61,11 @@ Oct 28: Watered
 Oct 30: Watered
 ```
 
-This is Event-Sourcing! Instead of just tracking the current state, grandma records every event that happens. Let's model this in code.
+**But WHY does this make a difference?**
+
+Looking at her notebook, I could immediately see the pattern: consistent watering every 2-3 days. My CRUD database couldn't tell me that. It only showed me the *last* time I watered Lucky, not the *pattern* of care.
+
+Grandma's notebook is Event-Sourcing—tracking every event that happens, not just the current state.
 
 ## Event-Sourcing: Storing the Full History
 
@@ -138,18 +110,15 @@ const grandmasPlantEvents: PlantEvent[] = [
 
 ## Reconstituting the Aggregate from Events
 
-The magic of Event-Sourcing is that we can reconstruct (reconstitute) the current state of our plant by replaying all its events. This reconstructed state is called an **aggregate**.
+The magic of Event-Sourcing is that we can reconstruct (reconstitute) the current state by replaying all events. This reconstructed state is called an **aggregate**.
+
+Let's focus on one key metric: **total water received**.
 
 ```typescript
 interface PlantAggregate {
   id: string;
   ownerId: string;
-  height: number;
-  health: number;
-  lastWatered: Date | null;
-  trimCount: number;
-  isHarvested: boolean;
-  wateringHistory: Date[];
+  totalWaterReceived: number;
 }
 
 function reconstitutePlant(events: PlantEvent[]): PlantAggregate {
@@ -157,12 +126,7 @@ function reconstitutePlant(events: PlantEvent[]): PlantAggregate {
   const aggregate: PlantAggregate = {
     id: "",
     ownerId: "",
-    height: 0,
-    health: 100,
-    lastWatered: null,
-    trimCount: 0,
-    isHarvested: false,
-    wateringHistory: []
+    totalWaterReceived: 0
   };
 
   // Replay each event to rebuild the state
@@ -171,36 +135,11 @@ function reconstitutePlant(events: PlantEvent[]): PlantAggregate {
       case "Seeded":
         aggregate.id = event.plantId;
         aggregate.ownerId = event.ownerId;
-        aggregate.height = 5; // Starts at 5cm
         break;
 
       case "Watered":
-        aggregate.lastWatered = event.timestamp;
-        aggregate.wateringHistory.push(event.timestamp);
-        // Each watering adds health and height
-        aggregate.health = Math.min(100, aggregate.health + 10);
-        aggregate.height += 2;
+        aggregate.totalWaterReceived += 1;
         break;
-
-      case "Trimmed":
-        aggregate.trimCount++;
-        // Trimming improves health
-        aggregate.health = Math.min(100, aggregate.health + 5);
-        break;
-
-      case "Harvested":
-        aggregate.isHarvested = true;
-        break;
-    }
-
-    // Simulate health decay over time
-    if (event.type !== "Seeded" && aggregate.lastWatered) {
-      const daysSinceWater = Math.floor(
-        (event.timestamp.getTime() - aggregate.lastWatered.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      if (daysSinceWater > 3) {
-        aggregate.health = Math.max(0, aggregate.health - (daysSinceWater * 2));
-      }
     }
   }
 
@@ -211,41 +150,22 @@ function reconstitutePlant(events: PlantEvent[]): PlantAggregate {
 const luckyState = reconstitutePlant(luckyEvents);
 const grandmasPlantState = reconstitutePlant(grandmasPlantEvents);
 
-console.log("Lucky:", luckyState);
-// { id: "plant-1", health: 30, height: 15, trimCount: 0, ... }
+console.log("Lucky:", JSON.stringify(luckyState, null, 2));
+// {
+//   "id": "plant-1",
+//   "ownerId": "me",
+//   "totalWaterReceived": 3
+// }
 
-console.log("Grandma's plant:", grandmasPlantState);
-// { id: "plant-2", health: 95, height: 45, trimCount: 3, ... }
+console.log("Grandma's plant:", JSON.stringify(grandmasPlantState, null, 2));
+// {
+//   "id": "plant-2",
+//   "ownerId": "grandma",
+//   "totalWaterReceived": 20
+// }
 ```
 
-### Key Benefits of Reconstitution
-
-1. **Audit Trail**: We know exactly what happened and when
-2. **Debugging**: We can replay events to understand why the state is what it is
-3. **Time Travel**: We can reconstitute the state at any point in time
-4. **Multiple Views**: We can create different aggregates from the same events
-
-```typescript
-// Example: Calculate average watering frequency
-function calculateWateringFrequency(events: PlantEvent[]): number {
-  const waterings = events
-    .filter(e => e.type === "Watered")
-    .map(e => e.timestamp);
-  
-  if (waterings.length < 2) return 0;
-  
-  const totalDays = (waterings[waterings.length - 1].getTime() - waterings[0].getTime()) 
-    / (1000 * 60 * 60 * 24);
-  
-  return waterings.length / totalDays;
-}
-
-console.log("Lucky's watering frequency:", calculateWateringFrequency(luckyEvents));
-// 0.04 waterings/day (once every 25 days)
-
-console.log("Grandma's watering frequency:", calculateWateringFrequency(grandmasPlantEvents));
-// 0.33 waterings/day (once every 3 days)
-```
+**The answer is clear**: Lucky only received 3 waterings in 2.5 months, while Grandma's plant received 20. The events tell the complete story.
 
 ## Summary
 
@@ -270,4 +190,4 @@ In the next chapter, we'll explore how projections let us create optimized, read
 
 ---
 
-*This is the first part of a series on Event-Sourcing. Stay tuned for the next chapter on Projections!*
+*This is Part 1 of the Event-Sourcing Series. Stay tuned for Part 2 on Projections!*
