@@ -91,15 +91,15 @@ const grandmasPlantEvents: PlantEvent[] = [
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-08-03") },
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-08-06") },
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-08-09") },
-  { type: "Trimmed", plantId: "plant-2", timestamp: new Date("2023-08-15") },
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-08-12") },
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-08-15") },
+  { type: "Trimmed", plantId: "plant-2", timestamp: new Date("2023-08-15") },
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-08-18") },
-  { type: "Trimmed", plantId: "plant-2", timestamp: new Date("2023-09-01") },
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-08-21") },
+  { type: "Trimmed", plantId: "plant-2", timestamp: new Date("2023-09-01") },
   // ... regular watering continues ...
-  { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-10-28") },
   { type: "Trimmed", plantId: "plant-2", timestamp: new Date("2023-10-20") },
+  { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-10-28") },
   { type: "Watered", plantId: "plant-2", timestamp: new Date("2023-10-30") }
 ];
 ```
