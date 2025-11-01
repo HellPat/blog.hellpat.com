@@ -33,6 +33,11 @@ A series exploring Event-Sourcing concepts using an unconventional but memorable
    - Building read-optimized views from events
    - The PlantsNeedingWater projection
 
+6. [Growing Marijuana with Event-Sourcing: Time Travel (Part 6)](event-sourcing-time-travel.md)
+   - Replaying events to any point in time
+   - Auditing and compliance with historical state
+   - Debugging by time traveling through events
+
 ---
 
 *More posts coming soon!*

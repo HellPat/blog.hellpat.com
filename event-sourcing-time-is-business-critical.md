@@ -285,6 +285,153 @@ Time isn't just infrastructure—it's a **first-class domain concept**.
 
 Making time explicit transforms it from a testing headache into a clear, auditable part of your domain.
 
+## The Pablo Escobar Problem: Billions of Events
+
+My operation has grown. Over the years, I've cultivated **billions of plants**. Each plant has its full event history stored in my event store—seeded, watered, observed, harvested, died. That's billions of events.
+
+But here's the thing: **this year I only have 1,000 living plants.**
+
+The problem hits me every morning when my cron job runs:
+
+```typescript
+// cron: 0 0 * * * (runs at midnight every day)
+async function fireDayStartedEvents(eventStore: EventStore): Promise<void> {
+  const allPlantIds = await eventStore.getAllPlantIds(); // Returns BILLIONS of IDs!
+  
+  for (const plantId of allPlantIds) {
+    const event: PlantEvent = {
+      type: "DayStarted",
+      plantId,
+      timestamp: new DateTimeImmutable()
+    };
+    
+    await eventStore.append(plantId, event);
+  }
+}
+```
+
+**Why am I firing `DayStarted` events for billions of dead plants?**
+
+- Plant from 2015 that died 8 years ago? Getting a `DayStarted` event.
+- Plant from 2019 that was harvested? Getting a `DayStarted` event.
+- Plant from last week that's long gone? Getting a `DayStarted` event.
+
+This is **wasteful**. The passage of time only matters for **living plants**.
+
+## The Solution: A Living Plants Projection
+
+Instead of firing events for every plant that ever existed, I maintain a projection of **only the living plants**:
+
+```typescript
+interface LivingPlant {
+  plantId: string;
+  ownerId: string;
+  daysSinceWatering: number;
+  seededAt: DateTimeImmutable;
+}
+
+class LivingPlantsProjection {
+  private livingPlants: Map<string, LivingPlant> = new Map();
+  
+  apply(event: PlantEvent): void {
+    const plantId = event.plantId;
+    
+    switch (event.type) {
+      case "Seeded":
+        // New living plant!
+        this.livingPlants.set(plantId, {
+          plantId,
+          ownerId: event.ownerId,
+          daysSinceWatering: 0,
+          seededAt: event.timestamp
+        });
+        break;
+        
+      case "Watered":
+        const plant = this.livingPlants.get(plantId);
+        if (plant) {
+          plant.daysSinceWatering = 0;
+        }
+        break;
+        
+      case "DayStarted":
+        const livingPlant = this.livingPlants.get(plantId);
+        if (livingPlant) {
+          livingPlant.daysSinceWatering += 1;
+        }
+        break;
+        
+      case "Harvested":
+      case "Died":
+        // Remove from living plants!
+        this.livingPlants.delete(plantId);
+        break;
+    }
+  }
+  
+  getLivingPlantIds(): string[] {
+    return Array.from(this.livingPlants.keys());
+  }
+  
+  getLivingPlant(plantId: string): LivingPlant | undefined {
+    return this.livingPlants.get(plantId);
+  }
+}
+```
+
+## Optimized Cron Job
+
+Now my cron job only targets **living plants**:
+
+```typescript
+// cron: 0 0 * * * (runs at midnight every day)
+async function fireDayStartedEvents(
+  eventStore: EventStore,
+  livingPlantsProjection: LivingPlantsProjection
+): Promise<void> {
+  const livingPlantIds = livingPlantsProjection.getLivingPlantIds(); // Only 1,000 IDs!
+  
+  for (const plantId of livingPlantIds) {
+    const event: PlantEvent = {
+      type: "DayStarted",
+      plantId,
+      timestamp: new DateTimeImmutable()
+    };
+    
+    await eventStore.append(plantId, event);
+  }
+  
+  console.log(`✓ Day started for ${livingPlantIds.length} living plants`);
+}
+```
+
+**Before**: Billions of events fired daily  
+**After**: 1,000 events fired daily
+
+The projection filters out all the noise. Only plants that matter to my domain—the living ones—get time events.
+
+## Why This Matters
+
+This isn't just about performance. It's about **domain relevance**:
+
+- **Dead plants don't care about time**: A plant harvested in 2019 doesn't need to know that today started
+- **Historical data stays intact**: All past events remain in the event store for auditing
+- **Current operations stay fast**: Only relevant plants get processed
+- **Projections filter reality**: Not everything in your event store is relevant to every operation
+
+The projection becomes a **domain filter**—it maintains only the state that matters for current business operations.
+
+## Key Insight
+
+When you have years of historical data, **not all of it is relevant to current operations**.
+
+Projections let you:
+1. Keep complete history in the event store (billions of events)
+2. Maintain only relevant state in projections (thousands of records)
+3. Operate on what matters (living plants, not dead ones)
+
+The event store is your **complete audit trail**. Projections are your **operational views**.
+
 ## Further Reading
 
 This pattern of modeling the passage of time in event-sourced systems is explored in depth by Mathias Verraes:  

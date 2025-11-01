@@ -258,6 +258,6 @@ Projections give you the best of both worlds: the complete audit trail of Event-
 
 ---
 
-*This is Part 5 of the Event-Sourcing Series.*
+*This is Part 5 of the Event-Sourcing Series. Continue to [Part 6: Time Travel](event-sourcing-time-travel.md)*
 
 *← Back to [Part 1: Introduction](event-sourcing-introduction.md) | [Part 2: Reconstituting the Aggregate](event-sourcing-reconstitution.md) | [Part 3: Business Logic in Aggregates](event-sourcing-business-logic.md) | [Part 4: Time is Business Critical](event-sourcing-time-is-business-critical.md)*
