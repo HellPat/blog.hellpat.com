@@ -17,6 +17,8 @@ Developers with practical experience in common development patterns (like CRUD o
 - Use analogies and comparisons to help readers understand new concepts
 - Build concepts incrementally - simple examples first, then more complex scenarios
 - Avoid jargon without explanation; define terms when first used
+- Summarize in the end
+- Tease the next chapter
 
 ### Code Example Best Practices
 
