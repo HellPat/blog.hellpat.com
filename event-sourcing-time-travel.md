@@ -1,6 +1,6 @@
-# Growing Marijuana with Event-Sourcing: Time Travel (Part 6)
+# Growing Marijuana with Event-Sourcing: Time Travel (Part 5)
 
-*← Back to [Part 5: Projections](event-sourcing-projections.md)*
+*← Back to [Part 4: Projections](event-sourcing-projections.md)*
 
 ## The Tax Audit
 
@@ -253,6 +253,6 @@ Time travel is one of the most powerful features of Event-Sourcing. Your event s
 
 ---
 
-*This is Part 6 of the Event-Sourcing Series.*
+*This is Part 5 of the Event-Sourcing Series.*
 
-*← Back to [Part 1: Introduction](event-sourcing-introduction.md) | [Part 2: Reconstituting the Aggregate](event-sourcing-reconstitution.md) | [Part 3: Business Logic in Aggregates](event-sourcing-business-logic.md) | [Part 4: Time is Business Critical](event-sourcing-time-is-business-critical.md) | [Part 5: Projections](event-sourcing-projections.md)*
+*← Back to [Part 1: Introduction](event-sourcing-introduction.md) | [Part 2: Aggregates & Business Logic](event-sourcing-aggregates.md) | [Part 3: Time is Business Critical](event-sourcing-time-is-business-critical.md) | [Part 4: Projections](event-sourcing-projections.md)*

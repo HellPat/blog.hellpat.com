@@ -1,6 +1,6 @@
-# Growing Marijuana with Event-Sourcing: Time is Business Critical (Part 4)
+# Growing Marijuana with Event-Sourcing: Time is Business Critical (Part 3)
 
-*← Back to [Part 3: Business Logic in Aggregates](event-sourcing-business-logic.md)*
+*← Back to [Part 2: Aggregates & Business Logic](event-sourcing-aggregates.md)*
 
 ## The Problem: When Did I Last Water My Plants?
 
@@ -21,12 +21,12 @@ function needsWatering(events: PlantEvent[]): boolean {
     .map(e => e.timestamp)
     .sort()
     .pop();
-  
+
   if (!lastWatered) return true;
-  
+
   const now = new Date();
   const daysSince = Math.floor((now.getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
-  
+
   return daysSince >= 3;
 }
 ```
@@ -59,7 +59,7 @@ test("plant needs watering after 3 days", () => {
     { type: "Seeded", plantId: "test-1", ownerId: "me", timestamp: new DateTimeImmutable("2023-08-01") },
     { type: "Watered", plantId: "test-1", timestamp: new DateTimeImmutable("2023-08-01") }
   ];
-  
+
   // How do I test this without waiting 3 days or mocking Date.now()?
   expect(needsWatering(events)).toBe(true);
 });
@@ -74,7 +74,7 @@ The passage of time is **business critical** for my plant operation, but it's no
 The key insight: **If time is business critical, make it an explicit event.**
 
 ```typescript
-type PlantEvent = 
+type PlantEvent =
   | { type: "Seeded"; plantId: string; ownerId: string; timestamp: DateTimeImmutable }
   | { type: "Watered"; plantId: string; timestamp: DateTimeImmutable }
   | { type: "DayStarted"; plantId: string; timestamp: DateTimeImmutable }
@@ -139,26 +139,26 @@ To make time pass, I set up a cron job that fires a `DayStarted` event for every
 // cron: 0 0 * * * (runs at midnight every day)
 async function fireDayStartedEvents(eventStore: EventStore): Promise<void> {
   const allPlantIds = await eventStore.getAllPlantIds();
-  
+
   for (const plantId of allPlantIds) {
     const event: PlantEvent = {
       type: "DayStarted",
       plantId,
       timestamp: new DateTimeImmutable()
     };
-    
+
     await eventStore.append(plantId, event);
   }
-  
+
   console.log(`✓ Day started for ${allPlantIds.length} plants`);
 }
 ```
 
 > [!NOTE]
 > **Scheduling Flexibility**
-> 
+>
 > It doesn't matter if the cron job runs at 00:00:00 or 00:00:23 or even 00:05:00. What matters is that a `DayStarted` event is fired once per day. The exact timing is not business critical—only the fact that a new day has begun.
-> 
+>
 > This decouples your domain logic from infrastructure and aligns with business outcomes: one explicit event per day is enough for audits, SLAs, and projections—no wall‑clock coupling.
 
 ## A Real Event Stream
@@ -169,16 +169,16 @@ Let's see how this looks in practice:
 const myPlantEvents: PlantEvent[] = [
   { type: "Seeded", plantId: "plant-1", ownerId: "me", timestamp: new DateTimeImmutable("2023-08-01T10:00:00") },
   { type: "Watered", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-01T10:15:00") },
-  
+
   // Midnight - new day starts
   { type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-02T00:00:00") },
-  
+
   // Midnight - new day starts
   { type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-03T00:00:00") },
-  
+
   // Midnight - new day starts
   { type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-04T00:00:00") },
-  
+
   // Morning check - 3 days have passed!
 ];
 
@@ -187,10 +187,10 @@ console.log(plant.daysSinceWatering); // 3
 console.log(plant.daysSinceWatering >= 3); // true - needs watering!
 
 // I water the plant
-myPlantEvents.push({ 
-  type: "Watered", 
-  plantId: "plant-1", 
-  timestamp: new DateTimeImmutable("2023-08-04T09:00:00") 
+myPlantEvents.push({
+  type: "Watered",
+  plantId: "plant-1",
+  timestamp: new DateTimeImmutable("2023-08-04T09:00:00")
 });
 
 const updatedPlant = reconstitutePlant(myPlantEvents);
@@ -224,7 +224,7 @@ test("plant needs watering after 3 days", () => {
     { type: "DayStarted", plantId: "test-1", timestamp: new DateTimeImmutable() },
     { type: "DayStarted", plantId: "test-1", timestamp: new DateTimeImmutable() }
   ];
-  
+
   const plant = reconstitutePlant(events);
   expect(plant.daysSinceWatering).toBe(3);
 });
@@ -297,14 +297,14 @@ The cost hits me every morning when my cron job runs:
 // cron: 0 0 * * * (runs at midnight every day)
 async function fireDayStartedEvents(eventStore: EventStore): Promise<void> {
   const allPlantIds = await eventStore.getAllPlantIds(); // Returns BILLIONS of IDs!
-  
+
   for (const plantId of allPlantIds) {
     const event: PlantEvent = {
       type: "DayStarted",
       plantId,
       timestamp: new DateTimeImmutable()
     };
-    
+
     await eventStore.append(plantId, event);
   }
 }
@@ -332,10 +332,10 @@ interface LivingPlant {
 
 class LivingPlantsProjection {
   private livingPlants: Map<string, LivingPlant> = new Map();
-  
+
   apply(event: PlantEvent): void {
     const plantId = event.plantId;
-    
+
     switch (event.type) {
       case "Seeded":
         // New living plant!
@@ -346,21 +346,21 @@ class LivingPlantsProjection {
           seededAt: event.timestamp
         });
         break;
-        
+
       case "Watered":
         const plant = this.livingPlants.get(plantId);
         if (plant) {
           plant.daysSinceWatering = 0;
         }
         break;
-        
+
       case "DayStarted":
         const livingPlant = this.livingPlants.get(plantId);
         if (livingPlant) {
           livingPlant.daysSinceWatering += 1;
         }
         break;
-        
+
       case "Harvested":
       case "Died":
         // Remove from living plants!
@@ -368,11 +368,11 @@ class LivingPlantsProjection {
         break;
     }
   }
-  
+
   getLivingPlantIds(): string[] {
     return Array.from(this.livingPlants.keys());
   }
-  
+
   getLivingPlant(plantId: string): LivingPlant | undefined {
     return this.livingPlants.get(plantId);
   }
@@ -390,22 +390,22 @@ async function fireDayStartedEvents(
   livingPlantsProjection: LivingPlantsProjection
 ): Promise<void> {
   const livingPlantIds = livingPlantsProjection.getLivingPlantIds(); // Only 1,000 IDs!
-  
+
   for (const plantId of livingPlantIds) {
     const event: PlantEvent = {
       type: "DayStarted",
       plantId,
       timestamp: new DateTimeImmutable()
     };
-    
+
     await eventStore.append(plantId, event);
   }
-  
+
   console.log(`✓ Day started for ${livingPlantIds.length} living plants`);
 }
 ```
 
-**Before**: Billions of events fired daily  
+**Before**: Billions of events fired daily
 **After**: 1,000 events fired daily
 
 The projection filters out all the noise. Only plants that matter to my domain—the living ones—get time events.
@@ -434,11 +434,11 @@ The event store is your **complete audit trail**. Projections are your **operati
 
 ## Further Reading
 
-This pattern of modeling the passage of time in event-sourced systems is explored in depth by Mathias Verraes:  
+This pattern of modeling the passage of time in event-sourced systems is explored in depth by Mathias Verraes:
 [Patterns for Decoupling in Distributed Systems: Passage of Time Event](https://verraes.net/2019/05/patterns-for-decoupling-distsys-passage-of-time-event/)
 
 ---
 
-*This is Part 4 of the Event-Sourcing Series. Continue to [Part 5: Projections](event-sourcing-projections.md)*
+*This is Part 3 of the Event-Sourcing Series. Continue to [Part 4: Projections](event-sourcing-projections.md)*
 
-*← Back to [Part 1: Introduction](event-sourcing-introduction.md) | [Part 2: Reconstituting the Aggregate](event-sourcing-reconstitution.md) | [Part 3: Business Logic in Aggregates](event-sourcing-business-logic.md)*
+*← Back to [Part 1: Introduction](event-sourcing-introduction.md) | [Part 2: Aggregates & Business Logic](event-sourcing-aggregates.md)*
