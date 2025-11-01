@@ -4,7 +4,7 @@
 
 ## The Tax Audit
 
-Three years ago, on August 15th, 2020, I made a decision that would haunt me. I told the tax authorities I had 47 plants in my greenhouse that day. They're auditing me now, and they want proof.
+On August 15th, 2020, I told the tax authorities I had 47 plants in my greenhouse. Today they’re auditing me, and they want proof.
 
 I look at my current database:
 
@@ -14,17 +14,16 @@ const currentPlants = database.getAllPlants();
 console.log(currentPlants.length); // 1,000 plants
 
 // But what about August 15th, 2020?
-// CRUD databases only store current state
-// The history is gone
+// With CRUD, only the current state is stored—the history is gone
 ```
 
 With a traditional CRUD system, I'm stuck. The data from 2020 has been overwritten thousands of times. I have no way to prove what my operation looked like on that specific date.
 
-**I'm going to jail.**
+**With CRUD, I can’t prove it. With Event‑Sourcing, I can.**
 
 ## The Magic of Event-Sourcing: Time Travel
 
-But wait—I've been using Event-Sourcing. Every single event is still in my event store:
+Fortunately, I’ve been using Event‑Sourcing. Every event is still in the store:
 
 ```typescript
 type PlantEvent = 
@@ -38,7 +37,7 @@ type PlantEvent =
 
 Every event has a timestamp. This means I can replay history **up to any point in time**.
 
-## Time Travel: Replaying Events Up To A Date
+## Time Travel: Replaying Events Up to a Date
 
 Here's how I prove I had 47 plants on August 15th, 2020:
 
@@ -61,7 +60,10 @@ function getStateAtPointInTime(
     eventsByPlant.get(event.plantId)!.push(event);
   }
   
-  // Reconstitute each plant's state at that point in time
+  // Sort each plant's events to ensure deterministic replay, then reconstitute
+  for (const events of eventsByPlant.values()) {
+    events.sort((a, b) => a.timestamp.compare(b.timestamp));
+  }
   const plantsAtDate = new Map<string, PlantAggregate>();
   for (const [plantId, events] of eventsByPlant) {
     const plant = reconstitutePlant(events);
@@ -216,8 +218,7 @@ Time travel is not free:
 
 ```typescript
 // For 10 million events, filtering and replaying takes time
-const eventsUntilDate = allEvents.filter(e => e.timestamp <= targetDate); // Filter 10M
-const plants = reconstitutePlants(eventsUntilDate); // Replay thousands of aggregates
+const plantsAtDate = getStateAtPointInTime(allEvents, targetDate); // Filter + replay thousands of aggregates
 ```
 
 **Optimizations:**

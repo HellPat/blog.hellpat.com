@@ -1,4 +1,4 @@
-# Grandma Growing Marijuana with Event-Sourcing: (Part 1)
+# Growing Marijuana with Event-Sourcing: Introduction (Part 1)
 
 ## The Story of My Plant
 
@@ -143,9 +143,7 @@ We've seen how storing events (Seeded, Watered, Trimmed, Harvested) allows us to
 3. Derive insights that would be impossible with just a snapshot
 4. **Watering helps**: Consistent watering every 2-3 days leads to healthy growth
 
-## What's Next: Reconstituting the Aggregate
 
-In the [next chapter](event-sourcing-reconstitution.md), we'll explore how to reconstitute (rebuild) the current state by replaying events. This reconstructed state is called an **aggregate**.
 
 ---
 

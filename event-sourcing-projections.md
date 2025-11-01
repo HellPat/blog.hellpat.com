@@ -2,7 +2,7 @@
 
 *← Back to [Part 4: Time is Business Critical](event-sourcing-time-is-business-critical.md)*
 
-## The Performance Problem
+## Why Projections: Fast Morning Checks
 
 I now have 50 plants. Every morning, I want to check: **"Which plants need watering today?"**
 
@@ -34,7 +34,7 @@ As my operation grows to 200 plants, this becomes unbearably slow. I need a bett
 
 Instead of reconstituting every time I query, what if I kept the current state of each plant already calculated?
 
-A **projection** is a read-optimized view built from your event stream. It's like a materialized view in a database—you update it as events come in, then queries are instant.
+A projection is a precomputed, read-optimized view of your events. We update it as events arrive so queries are instant and predictable.
 
 ```typescript
 interface PlantWateringProjection {
@@ -125,9 +125,9 @@ async function buildProjection(eventStore: EventStore): Promise<PlantsNeedingWat
 }
 ```
 
-## Keeping the Projection Up-to-Date
+## Keeping the Projection Fresh
 
-The projection needs to stay synchronized with the event store. We use a long-running worker that continuously processes new events:
+Keep it synchronized with a simple long-running worker that processes new events as they arrive:
 
 ```typescript
 async function projectionWorker(
@@ -168,7 +168,7 @@ async function waterPlant(plantId: string, eventStore: EventStore): Promise<void
 
 ## Using the Projection
 
-Now my morning check is instant:
+Now the morning check is instant and predictable:
 
 ```typescript
 // Before: 5,000-10,000 events replayed
@@ -236,7 +236,7 @@ The event store is the source of truth. Projections are just optimized views.
 
 ## Key Takeaways
 
-Projections solve the performance problem of Event-Sourcing:
+Projections exist to make reads fast without compromising the write model:
 
 1. **Write**: Events are appended to the event store (source of truth)
 2. **Project**: Events are applied to projections (read-optimized views)

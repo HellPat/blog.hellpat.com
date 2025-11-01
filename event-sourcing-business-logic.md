@@ -25,7 +25,7 @@ function harvestPlant(plantId: string): void {
 }
 ```
 
-But in Event-Sourcing, we enforce business rules *before* creating events, not when applying them to the aggregate.
+In Event‑Sourcing, we enforce business rules before we create events—not while reconstituting. Aggregates only apply events; command handlers decide whether new events are allowed.
 
 ## Business Logic in the Aggregate
 
@@ -149,7 +149,7 @@ function harvestPlant(events: PlantEvent[], timestamp: DateTimeImmutable): Plant
 
 ## The Story Continues
 
-Let's see this in action with myPlant's sad story:
+Let’s see this in action with myPlant’s short, sad story:
 
 ```typescript
 // myPlant's unfortunate journey
@@ -168,7 +168,7 @@ try {
 }
 ```
 
-myPlant died from neglect. The business logic prevents us from harvesting a dead plant.
+myPlant died from neglect. The aggregate’s rules act like a bouncer at the door: no “Harvested” event gets in if the plant is dead.
 
 Meanwhile, Grandma's plant thrived:
 

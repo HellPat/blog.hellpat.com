@@ -6,7 +6,7 @@
 
 After seeing Grandma's success, I've expanded my operation. I now have 20 plants at various stages of growth. Every morning, I need to know: **"Which plants need watering today?"**
 
-My rule is simple: water every plant that hasn't been watered in 3 days.
+My rule is simple: water every plant that hasn't been watered in 3 days—too early wastes resources, too late hurts yield.
 
 But here's the question: **How do I know how many days have passed?**
 
@@ -31,7 +31,7 @@ function needsWatering(events: PlantEvent[]): boolean {
 }
 ```
 
-This works... but it has serious problems.
+This works for a demo, but in production it has serious problems with determinism, testing, and auditability.
 
 ## Why This Approach Fails
 
@@ -159,7 +159,7 @@ async function fireDayStartedEvents(eventStore: EventStore): Promise<void> {
 > 
 > It doesn't matter if the cron job runs at 00:00:00 or 00:00:23 or even 00:05:00. What matters is that a `DayStarted` event is fired once per day. The exact timing is not business critical—only the fact that a new day has begun.
 > 
-> This decouples your domain logic from infrastructure concerns. The cron job is just a trigger; the business logic lives in how you handle the events.
+> This decouples your domain logic from infrastructure and aligns with business outcomes: one explicit event per day is enough for audits, SLAs, and projections—no wall‑clock coupling.
 
 ## A Real Event Stream
 
@@ -197,7 +197,7 @@ const updatedPlant = reconstitutePlant(myPlantEvents);
 console.log(updatedPlant.daysSinceWatering); // 0 - reset!
 ```
 
-## Why This Is Better
+## Why This Is Better for the Business
 
 ### ✅ Deterministic
 
@@ -291,7 +291,7 @@ My operation has grown. Over the years, I've cultivated **billions of plants**. 
 
 But here's the thing: **this year I only have 1,000 living plants.**
 
-The problem hits me every morning when my cron job runs:
+The cost hits me every morning when my cron job runs:
 
 ```typescript
 // cron: 0 0 * * * (runs at midnight every day)
@@ -316,7 +316,7 @@ async function fireDayStartedEvents(eventStore: EventStore): Promise<void> {
 - Plant from 2019 that was harvested? Getting a `DayStarted` event.
 - Plant from last week that's long gone? Getting a `DayStarted` event.
 
-This is **wasteful**. The passage of time only matters for **living plants**.
+This is **wasteful**. The passage of time only matters for **living plants**—the ones I can still influence.
 
 ## The Solution: A Living Plants Projection
 
