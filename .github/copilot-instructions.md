@@ -39,7 +39,7 @@ class AbstractEventSourcingRepositoryFactory<T extends object> {
 ```typescript
 // Traditional CRUD approach
 function updateUser(userId: string, email: string): void {
-  // Assume database is available
+  // Direct database update - loses historical information
   database.users.update({ id: userId }, { email });
 }
 
@@ -56,7 +56,7 @@ function updateUserEmail(userId: string, email: string): void {
     email,
     timestamp: new Date()
   };
-  // Assume eventStore is available
+  // Store event - preserves complete history
   eventStore.append(event);
 }
 ```
