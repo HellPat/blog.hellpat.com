@@ -1,7 +1,7 @@
 # GitHub Copilot Instructions for Blog Posts
 
 ## Target Audience
-Developers who are familiar with CRUD operations but new to event sourcing.
+Developers with practical experience in common development patterns (like CRUD operations) who are exploring new concepts and architectural approaches.
 
 ## Writing Guidelines
 
@@ -13,7 +13,7 @@ Developers who are familiar with CRUD operations but new to event sourcing.
 - Include type annotations to make the code self-documenting
 
 ### Content Structure
-- Start with familiar CRUD concepts before introducing event sourcing equivalents
+- Start with familiar concepts before introducing new ones
 - Use analogies and comparisons to help readers understand new concepts
 - Build concepts incrementally - simple examples first, then more complex scenarios
 - Avoid jargon without explanation; define terms when first used
@@ -23,51 +23,48 @@ Developers who are familiar with CRUD operations but new to event sourcing.
 #### Minimal TypeScript Examples
 ```typescript
 // ✅ Good: Minimal, focused example
-interface UserCreatedEvent {
-  userId: string;
+interface User {
+  id: string;
   email: string;
-  timestamp: Date;
+  createdAt: Date;
 }
 
 // ❌ Avoid: Over-engineered examples
-class AbstractEventSourcingRepositoryFactory<T extends object> {
+class AbstractGenericRepositoryFactory<T extends object> {
   // Too complex for introductory content
 }
 ```
 
-#### Show CRUD vs Event Sourcing
+#### Compare Approaches
+When introducing new patterns or techniques, show how they differ from familiar approaches:
+
 ```typescript
-// Traditional CRUD approach
-function updateUser(userId: string, email: string): void {
-  // Direct database update - loses historical information
-  database.users.update({ id: userId }, { email });
+// Traditional approach
+function processOrder(orderId: string, items: Item[]): void {
+  const total = items.reduce((sum, item) => sum + item.price, 0);
+  database.orders.update({ id: orderId }, { total, status: 'processed' });
 }
 
-// Event sourcing approach
-interface UserEmailChangedEvent {
-  userId: string;
-  email: string;
+// Alternative approach with better separation
+interface OrderProcessed {
+  orderId: string;
+  total: number;
   timestamp: Date;
 }
 
-function updateUserEmail(userId: string, email: string): void {
-  const event: UserEmailChangedEvent = {
-    userId,
-    email,
+function processOrder(orderId: string, items: Item[]): OrderProcessed {
+  const total = calculateTotal(items);
+  return {
+    orderId,
+    total,
     timestamp: new Date()
   };
-  // Store event - preserves complete history
-  eventStore.append(event);
+}
+
+function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
 }
 ```
-
-### Event Sourcing Concepts to Cover
-- Events as first-class citizens
-- Immutability of events
-- Event store vs traditional database
-- Event replay and projections
-- Aggregate patterns (when ready for intermediate content)
-- Event versioning and schema evolution (for advanced topics)
 
 ### Writing Style
 - Use clear, concise language
