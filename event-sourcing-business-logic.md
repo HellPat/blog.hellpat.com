@@ -32,14 +32,13 @@ But in Event-Sourcing, we enforce business rules *before* creating events, not w
 Let's extend our aggregate to track more state and enforce business rules:
 
 ```typescript
-type PlantEvent =
+type PlantEvent = 
   | { type: "Seeded"; plantId: string; ownerId: string; timestamp: DateTimeImmutable }
   | { type: "Watered"; plantId: string; timestamp: DateTimeImmutable }
   | { type: "Trimmed"; plantId: string; timestamp: DateTimeImmutable }
   | { type: "Observed"; plantId: string; heightCm: number; budCount: number; condition: "healthy" | "unhealthy" | "dying"; timestamp: DateTimeImmutable }
   | { type: "Harvested"; plantId: string; budCount: number; timestamp: DateTimeImmutable }
   | { type: "Died"; plantId: string; timestamp: DateTimeImmutable };
-</parameter>
 
 interface PlantAggregate {
   id: string;
@@ -114,9 +113,6 @@ function reconstitutePlant(events: PlantEvent[]): PlantAggregate {
 >
 > Business logic belongs in the **command handlers** (like `harvestPlant`), not in reconstitution.
 
-```typescript
-```
-
 ## Enforcing Business Rules
 
 Now we can validate operations before adding new events:
@@ -153,26 +149,26 @@ function harvestPlant(events: PlantEvent[], timestamp: DateTimeImmutable): Plant
 
 ## The Story Continues
 
-Let's see this in action with Lucky's sad story:
+Let's see this in action with myPlant's sad story:
 
 ```typescript
-// Lucky's unfortunate journey
-const luckyEvents: PlantEvent[] = [
+// myPlant's unfortunate journey
+const myPlantEvents: PlantEvent[] = [
   { type: "Seeded", plantId: "plant-1", ownerId: "me", timestamp: new DateTimeImmutable("2023-08-01T10:00:00") },
   { type: "Watered", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-05T14:30:00") },
   { type: "Watered", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-20T11:15:00") },
   { type: "Died", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-09-01T09:00:00") }
 ];
 
-// Try to harvest Lucky
+// Try to harvest myPlant
 try {
-  harvestPlant(luckyEvents, new DateTimeImmutable("2023-10-30T14:00:00"));
+  harvestPlant(myPlantEvents, new DateTimeImmutable("2023-10-30T14:00:00"));
 } catch (error) {
-  console.log(error.message); // "Cannot harvest plant: conditions not met"
+  console.log(error.message); // "Cannot harvest a dead plant"
 }
 ```
 
-Lucky died from neglect. The business logic prevents us from harvesting a dead plant.
+myPlant died from neglect. The business logic prevents us from harvesting a dead plant.
 
 Meanwhile, Grandma's plant thrived:
 

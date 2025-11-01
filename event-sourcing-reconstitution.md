@@ -47,10 +47,10 @@ function reconstitutePlant(events: PlantEvent[]): PlantAggregate {
 }
 
 // Reconstitute both plants
-const luckyState = reconstitutePlant(luckyEvents);
+const myPlantState = reconstitutePlant(myPlantEvents);
 const grandmasPlantState = reconstitutePlant(grandmasPlantEvents);
 
-console.log("Lucky:", JSON.stringify(luckyState, null, 2));
+console.log("myPlant:", JSON.stringify(myPlantState, null, 2));
 // {
 //   "id": "plant-1",
 //   "ownerId": "me",
@@ -65,7 +65,7 @@ console.log("Grandma's plant:", JSON.stringify(grandmasPlantState, null, 2));
 // }
 ```
 
-**The answer is clear**: Lucky only received 3 waterings in 2.5 months, while Grandma's plant received 34 consistent waterings. The events tell the complete story.
+**The answer is clear**: myPlant only received 3 waterings in 2.5 months, while Grandma's plant received 34 consistent waterings. The events tell the complete story.
 
 The reconstitution process is the heart of Event-Sourcing. By applying each event in sequence, we can rebuild the aggregate state at any point in time. This makes debugging, auditing, and understanding state changes much more powerful.
 
