@@ -1,0 +1,297 @@
+# Growing Marijuana with Event-Sourcing: Time is Business Critical (Part 4)
+
+*← Back to [Part 3: Business Logic in Aggregates](event-sourcing-business-logic.md)*
+
+## The Problem: When Did I Last Water My Plants?
+
+After seeing Grandma's success, I've expanded my operation. I now have 20 plants at various stages of growth. Every morning, I need to know: **"Which plants need watering today?"**
+
+My rule is simple: water every plant that hasn't been watered in 3 days.
+
+But here's the question: **How do I know how many days have passed?**
+
+## The Naive Approach: Calculate from Timestamps
+
+My first instinct is to look at the `Watered` event timestamps and calculate the difference:
+
+```typescript
+function needsWatering(events: PlantEvent[]): boolean {
+  const lastWatered = events
+    .filter(e => e.type === "Watered")
+    .map(e => e.timestamp)
+    .sort()
+    .pop();
+  
+  if (!lastWatered) return true;
+  
+  const now = new Date();
+  const daysSince = Math.floor((now.getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
+  
+  return daysSince >= 3;
+}
+```
+
+This works... but it has serious problems.
+
+## Why This Approach Fails
+
+### Problem 1: Non-Deterministic Behavior
+
+```typescript
+// Today is 2023-08-10
+const plant = reconstitutePlant(events);
+console.log(needsWatering(events)); // false (2 days since watering)
+
+// Tomorrow is 2023-08-11
+const plant = reconstitutePlant(events); // Same events!
+console.log(needsWatering(events)); // true (3 days since watering)
+```
+
+**The same event stream produces different results depending on when you replay it.** This breaks a fundamental principle of Event-Sourcing: reconstitution should be deterministic.
+
+### Problem 2: Untestable
+
+How do you write a test for "3 days have passed" without waiting 3 actual days or mocking the system clock?
+
+```typescript
+test("plant needs watering after 3 days", () => {
+  const events = [
+    { type: "Seeded", plantId: "test-1", ownerId: "me", timestamp: new DateTimeImmutable("2023-08-01") },
+    { type: "Watered", plantId: "test-1", timestamp: new DateTimeImmutable("2023-08-01") }
+  ];
+  
+  // How do I test this without waiting 3 days or mocking Date.now()?
+  expect(needsWatering(events)).toBe(true);
+});
+```
+
+### Problem 3: Not Part of the Event Stream
+
+The passage of time is **business critical** for my plant operation, but it's not recorded in my events. If I replay my event stream in a year, I have no record of when days actually passed.
+
+## The Solution: Time as a Business Event
+
+The key insight: **If time is business critical, make it an explicit event.**
+
+```typescript
+type PlantEvent = 
+  | { type: "Seeded"; plantId: string; ownerId: string; timestamp: DateTimeImmutable }
+  | { type: "Watered"; plantId: string; timestamp: DateTimeImmutable }
+  | { type: "DayStarted"; plantId: string; timestamp: DateTimeImmutable }
+  | { type: "Observed"; plantId: string; heightCm: number; budCount: number; condition: "healthy" | "unhealthy" | "dying"; timestamp: DateTimeImmutable }
+  | { type: "Harvested"; plantId: string; budCount: number; timestamp: DateTimeImmutable }
+  | { type: "Died"; plantId: string; timestamp: DateTimeImmutable };
+```
+
+Now I can track time explicitly in my aggregate:
+
+```typescript
+interface PlantAggregate {
+  id: string;
+  ownerId: string;
+  isAlive: boolean;
+  daysSinceWatering: number; // Business-critical metric!
+  totalWaterReceived: number;
+  // ... other fields
+}
+
+function reconstitutePlant(events: PlantEvent[]): PlantAggregate {
+  const aggregate: PlantAggregate = {
+    id: "",
+    ownerId: "",
+    isAlive: false,
+    daysSinceWatering: 0,
+    totalWaterReceived: 0
+  };
+
+  for (const event of events) {
+    switch (event.type) {
+      case "Seeded":
+        aggregate.id = event.plantId;
+        aggregate.ownerId = event.ownerId;
+        aggregate.isAlive = true;
+        break;
+
+      case "Watered":
+        aggregate.totalWaterReceived += 1;
+        aggregate.daysSinceWatering = 0; // Reset!
+        break;
+
+      case "DayStarted":
+        aggregate.daysSinceWatering += 1; // Increment!
+        break;
+
+      case "Died":
+        aggregate.isAlive = false;
+        break;
+    }
+  }
+
+  return aggregate;
+}
+```
+
+## Making Days Pass: The Cron Job
+
+To make time pass, I set up a cron job that fires a `DayStarted` event for every plant once per day:
+
+```typescript
+// cron: 0 0 * * * (runs at midnight every day)
+async function fireDayStartedEvents(eventStore: EventStore): Promise<void> {
+  const allPlantIds = await eventStore.getAllPlantIds();
+  
+  for (const plantId of allPlantIds) {
+    const event: PlantEvent = {
+      type: "DayStarted",
+      plantId,
+      timestamp: new DateTimeImmutable()
+    };
+    
+    await eventStore.append(plantId, event);
+  }
+  
+  console.log(`✓ Day started for ${allPlantIds.length} plants`);
+}
+```
+
+> [!NOTE]
+> **Scheduling Flexibility**
+> 
+> It doesn't matter if the cron job runs at 00:00:00 or 00:00:23 or even 00:05:00. What matters is that a `DayStarted` event is fired once per day. The exact timing is not business critical—only the fact that a new day has begun.
+> 
+> This decouples your domain logic from infrastructure concerns. The cron job is just a trigger; the business logic lives in how you handle the events.
+
+## A Real Event Stream
+
+Let's see how this looks in practice:
+
+```typescript
+const myPlantEvents: PlantEvent[] = [
+  { type: "Seeded", plantId: "plant-1", ownerId: "me", timestamp: new DateTimeImmutable("2023-08-01T10:00:00") },
+  { type: "Watered", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-01T10:15:00") },
+  
+  // Midnight - new day starts
+  { type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-02T00:00:00") },
+  
+  // Midnight - new day starts
+  { type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-03T00:00:00") },
+  
+  // Midnight - new day starts
+  { type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable("2023-08-04T00:00:00") },
+  
+  // Morning check - 3 days have passed!
+];
+
+const plant = reconstitutePlant(myPlantEvents);
+console.log(plant.daysSinceWatering); // 3
+console.log(plant.daysSinceWatering >= 3); // true - needs watering!
+
+// I water the plant
+myPlantEvents.push({ 
+  type: "Watered", 
+  plantId: "plant-1", 
+  timestamp: new DateTimeImmutable("2023-08-04T09:00:00") 
+});
+
+const updatedPlant = reconstitutePlant(myPlantEvents);
+console.log(updatedPlant.daysSinceWatering); // 0 - reset!
+```
+
+## Why This Is Better
+
+### ✅ Deterministic
+
+```typescript
+// Replay in 2023
+const plant1 = reconstitutePlant(myPlantEvents);
+console.log(plant1.daysSinceWatering); // 3
+
+// Replay in 2025 - same result!
+const plant2 = reconstitutePlant(myPlantEvents);
+console.log(plant2.daysSinceWatering); // 3
+```
+
+The same event stream **always** produces the same result.
+
+### ✅ Testable
+
+```typescript
+test("plant needs watering after 3 days", () => {
+  const events = [
+    { type: "Seeded", plantId: "test-1", ownerId: "me", timestamp: new DateTimeImmutable() },
+    { type: "Watered", plantId: "test-1", timestamp: new DateTimeImmutable() },
+    { type: "DayStarted", plantId: "test-1", timestamp: new DateTimeImmutable() },
+    { type: "DayStarted", plantId: "test-1", timestamp: new DateTimeImmutable() },
+    { type: "DayStarted", plantId: "test-1", timestamp: new DateTimeImmutable() }
+  ];
+  
+  const plant = reconstitutePlant(events);
+  expect(plant.daysSinceWatering).toBe(3);
+});
+```
+
+No mocking, no waiting, just add events.
+
+### ✅ Auditable
+
+The event stream now contains a complete record of when time passed:
+
+```typescript
+// I can see exactly when each day started
+console.log(myPlantEvents.filter(e => e.type === "DayStarted"));
+// [
+//   { type: "DayStarted", timestamp: "2023-08-02T00:00:00" },
+//   { type: "DayStarted", timestamp: "2023-08-03T00:00:00" },
+//   { type: "DayStarted", timestamp: "2023-08-04T00:00:00" }
+// ]
+```
+
+### ✅ Domain Purity
+
+My aggregate doesn't need to know about system clocks, time zones, or `Date.now()`. It just responds to events:
+
+```typescript
+case "DayStarted":
+  aggregate.daysSinceWatering += 1;
+  break;
+```
+
+Clean. Simple. Testable.
+
+## The Core Principle: Time is Business Critical
+
+The lesson here isn't just about Event-Sourcing—it's about recognizing what's business critical:
+
+- **Is the passage of time important to your business logic?**
+- **Do you make decisions based on how much time has passed?**
+- **Would you need to audit when time-based events occurred?**
+
+If the answer is yes, **make time an explicit part of your domain model.**
+
+In my plant operation:
+- 🌱 Days since watering determines plant health
+- 🌱 Days since seeding determines growth stage
+- 🌱 Days until harvest determines planning
+
+Time isn't just infrastructure—it's a **first-class domain concept**.
+
+## Key Takeaways
+
+1. **Time as an Event**: If time matters to your business, model it explicitly
+2. **Deterministic Behavior**: Event streams should replay the same way regardless of when you replay them
+3. **Testability**: Time-based logic becomes trivial to test with explicit time events
+4. **Auditability**: Your event stream records when time passed, not just business actions
+5. **Domain Purity**: Aggregates stay pure—no dependency on system clocks
+
+Making time explicit transforms it from a testing headache into a clear, auditable part of your domain.
+
+## Further Reading
+
+This pattern of modeling the passage of time in event-sourced systems is explored in depth by Mathias Verraes:  
+[Patterns for Decoupling in Distributed Systems: Passage of Time Event](https://verraes.net/2019/05/patterns-for-decoupling-distsys-passage-of-time-event/)
+
+---
+
+*This is Part 4 of the Event-Sourcing Series. Continue to [Part 5: Projections](event-sourcing-projections.md)*
+
+*← Back to [Part 1: Introduction](event-sourcing-introduction.md) | [Part 2: Reconstituting the Aggregate](event-sourcing-reconstitution.md) | [Part 3: Business Logic in Aggregates](event-sourcing-business-logic.md)*

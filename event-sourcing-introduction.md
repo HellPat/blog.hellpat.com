@@ -1,4 +1,4 @@
-# Growing Marijuana with Event-Sourcing: Lucky and Grandma (Part 1)
+# Grandma Growing Marijuana with Event-Sourcing: (Part 1)
 
 ## The Story of My Plant
 
@@ -12,15 +12,19 @@ Today, I checked on Lucky. The leaves are yellowing, the stem is thin, and it's 
 
 In a traditional CRUD database, I track Lucky like this:
 
+```
 | id | ownerId | height | health | lastWatered | trimCount |
 |----|---------|--------|--------|-------------|-----------|
-| plant-1 | me | 15 | 30 | 2023-10-15T14:30:00 | 0 |
+| plant-1 | me | 15 | 30 | 2023-10-15T14:30:00 | 0         |
+```
 
 When I water Lucky, I update the row:
 
+```
 | id | ownerId | height | health | lastWatered | trimCount |
 |----|---------|--------|--------|-------------|-----------|
-| plant-1 | me | 15 | 35 | 2023-10-30T09:15:00 | 0 |
+| plant-1 | me | 15 | 35 | 2023-10-30T09:15:00 | 0         |
+```
 
 The old values are gone. Overwritten.
 
@@ -70,11 +74,11 @@ Grandma's notebook is Event-Sourcing—tracking every event that happens, not ju
 With Event-Sourcing, instead of storing just the current state, we store every event that happened:
 
 ```typescript
-type PlantEvent = 
+type PlantEvent =
   | { type: "Seeded"; plantId: string; ownerId: string; timestamp: DateTimeImmutable }
   | { type: "Watered"; plantId: string; timestamp: DateTimeImmutable }
   | { type: "Trimmed"; plantId: string; timestamp: DateTimeImmutable }
-  | { type: "Harvested"; plantId: string; timestamp: DateTimeImmutable };
+  | { type: "Harvested"; plantId: string; weightGrams: number; timestamp: DateTimeImmutable };
 
 // Lucky's event history (my sporadic care)
 const luckyEvents: PlantEvent[] = [

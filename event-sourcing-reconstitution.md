@@ -69,12 +69,6 @@ console.log("Grandma's plant:", JSON.stringify(grandmasPlantState, null, 2));
 
 The reconstitution process is the heart of Event-Sourcing. By applying each event in sequence, we can rebuild the aggregate state at any point in time. This makes debugging, auditing, and understanding state changes much more powerful.
 
-## What's Next: Projections
-
-But what if reconstituting from thousands of events becomes slow? What if we need different views of the same data for different purposes? That's where **Projections** come in.
-
-In the next chapter, we'll explore how projections let us create optimized, read-specific models from our event stream, giving us the best of both worlds: the complete history of Event-Sourcing with the query performance of traditional databases.
-
 ---
 
-*This is Part 2 of the Event-Sourcing Series. Stay tuned for Part 3 on Projections!*
+*This is Part 2 of the Event-Sourcing Series. Continue to [Part 3: Business Logic in Aggregates](event-sourcing-business-logic.md)*
