@@ -30,7 +30,7 @@ interface UserCreatedEvent {
 }
 
 // ❌ Avoid: Over-engineered examples
-class AbstractEventSourcingRepositoryFactory<T extends BaseEntity> {
+class AbstractEventSourcingRepositoryFactory<T extends object> {
   // Too complex for introductory content
 }
 ```
@@ -39,16 +39,24 @@ class AbstractEventSourcingRepositoryFactory<T extends BaseEntity> {
 ```typescript
 // Traditional CRUD approach
 function updateUser(userId: string, email: string): void {
+  // Assume database is available
   database.users.update({ id: userId }, { email });
 }
 
 // Event sourcing approach
+interface UserEmailChangedEvent {
+  userId: string;
+  email: string;
+  timestamp: Date;
+}
+
 function updateUserEmail(userId: string, email: string): void {
   const event: UserEmailChangedEvent = {
     userId,
     email,
     timestamp: new Date()
   };
+  // Assume eventStore is available
   eventStore.append(event);
 }
 ```
