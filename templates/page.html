@@ -4,7 +4,16 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{{ page.title }}</title>
-        <link rel="stylesheet" href="/styles.css">
+        <link rel="stylesheet" href="/styles.css" />
+        <style>
+            /**
+             * Hide the summary paragraph on the full article page
+             * TODO: find a non-hacky way to hide the summary on the blog post page
+             */
+            article.prose > p:first-child {
+                display: none;
+            }
+        </style>
     </head>
     <body class="max-w-4xl mx-auto p-8">
         <article class="prose lg:prose-xl">{{ page.content | safe }}</article>
