@@ -1,43 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config.title }}</title>
-</head>
-<body>
-    <h1>Blog</h1>
-    
-    {% set blog_section = get_section(path="blog/_index.md") %}
-    
-    <h2>Series</h2>
-    
-    <ul>
-    {% for subsection in blog_section.subsections %}
-        {% set sub = get_section(path=subsection) %}
-        <li>
-            <a href="{{ sub.permalink }}">{{ sub.title }}</a>
-            {% if sub.content %}
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{ config.title }}</title>
+        <style>
+            .warning-banner {
+                background-color: #ff0000;
+                color: #ffffff;
+                padding: 30px;
+                text-align: center;
+                font-size: 32px;
+                font-weight: bold;
+                border: 5px solid #8b0000;
+                margin: 0;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="warning-banner">⚠️ WARNING: Tim sucks dick! ⚠️</div>
+        <h1>Blog</h1>
+
+        {% set blog_section = get_section(path="blog/_index.md") %}
+
+        <h2>Series</h2>
+
+        <ul>
+            {% for subsection in blog_section.subsections %} {% set sub =
+            get_section(path=subsection) %}
+            <li>
+                <a href="{{ sub.permalink }}">{{ sub.title }}</a>
+                {% if sub.content %}
                 <p>{{ sub.content | striptags | truncate(length=150) }}</p>
-            {% endif %}
-        </li>
-    {% endfor %}
-    </ul>
-    
-    <h2>Latest Articles</h2>
-    
-    <ul>
-    {% for subsection in blog_section.subsections %}
-        {% set sub = get_section(path=subsection) %}
-        {% for page in sub.pages %}
-        <li>
-            <a href="{{ page.permalink }}">{{ page.title }}</a>
-            {% if page.date %}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Latest Articles</h2>
+
+        <ul>
+            {% for subsection in blog_section.subsections %} {% set sub =
+            get_section(path=subsection) %} {% for page in sub.pages %}
+            <li>
+                <a href="{{ page.permalink }}">{{ page.title }}</a>
+                {% if page.date %}
                 <time>{{ page.date }}</time>
-            {% endif %}
-        </li>
-        {% endfor %}
-    {% endfor %}
-    </ul>
-</body>
+                {% endif %}
+            </li>
+            {% endfor %} {% endfor %}
+        </ul>
+    </body>
 </html>
