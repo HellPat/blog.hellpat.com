@@ -1,4 +1,9 @@
-# Growing Marijuana with Event-Sourcing: Projections (Part 4)
++++
+title = "Growing Marijuana with Event-Sourcing: Projections"
+draft = true
++++
+
+# Growing Marijuana with Event-Sourcing: Projections
 
 *← Back to [Part 3: Time is Business Critical](event-sourcing-time-is-business-critical.md)*
 
@@ -17,7 +22,7 @@ const plantsNeedingWater = [];
 for (const plantId of allPlantIds) {
   const events = await eventStore.getEvents(plantId); // 100-200 events per plant
   const plant = reconstitutePlant(events);
-  
+
   if (plant.isAlive && plant.daysSinceWatering >= 3) {
     plantsNeedingWater.push(plant);
   }
@@ -52,11 +57,11 @@ The projection maintains state by handling each event:
 ```typescript
 class PlantsNeedingWaterProjection {
   private plants: Map<string, PlantWateringProjection> = new Map();
-  
+
   // Apply an event to update the projection
   apply(event: PlantEvent): void {
     const plantId = event.plantId;
-    
+
     // Get current state or create empty
     let plant = this.plants.get(plantId);
     if (!plant) {
@@ -67,7 +72,7 @@ class PlantsNeedingWaterProjection {
         daysSinceWatering: 0
       };
     }
-    
+
     // Update state based on event
     switch (event.type) {
       case "Seeded":
@@ -75,29 +80,29 @@ class PlantsNeedingWaterProjection {
         plant.isAlive = true;
         plant.daysSinceWatering = 0;
         break;
-        
+
       case "Watered":
         plant.daysSinceWatering = 0;
         break;
-        
+
       case "DayStarted":
         plant.daysSinceWatering += 1;
         break;
-        
+
       case "Died":
         plant.isAlive = false;
         break;
     }
-    
+
     this.plants.set(plantId, plant);
   }
-  
+
   // Query the projection - instant!
   getPlantsNeedingWater(): PlantWateringProjection[] {
     return Array.from(this.plants.values())
       .filter(plant => plant.isAlive && plant.daysSinceWatering >= 3);
   }
-  
+
   getPlant(plantId: string): PlantWateringProjection | undefined {
     return this.plants.get(plantId);
   }
@@ -111,15 +116,15 @@ When the system starts, replay all historical events to build the projection:
 ```typescript
 async function buildProjection(eventStore: EventStore): Promise<PlantsNeedingWaterProjection> {
   const projection = new PlantsNeedingWaterProjection();
-  
+
   // Get all events from all plants
   const allEvents = await eventStore.getAllEvents();
-  
+
   // Replay each event to build current state
   for (const event of allEvents) {
     projection.apply(event);
   }
-  
+
   console.log(`✓ Projection built from ${allEvents.length} events`);
   return projection;
 }
@@ -135,16 +140,16 @@ async function projectionWorker(
   projection: PlantsNeedingWaterProjection
 ): Promise<void> {
   console.log("Starting projection worker...");
-  
+
   while (true) {
     // Get new events since last processed
     const newEvents = await eventStore.getNewEventsSince(projection.lastProcessedEventId);
-    
+
     // Apply each event to the projection
     for (const event of newEvents) {
       projection.apply(event);
     }
-    
+
     // Wait a bit before checking for more events
     await sleep(100); // Check every 100ms
   }
@@ -160,7 +165,7 @@ async function waterPlant(plantId: string, eventStore: EventStore): Promise<void
     plantId,
     timestamp: new DateTimeImmutable()
   };
-  
+
   // Just store the event - the worker will pick it up
   await eventStore.append(plantId, event);
 }
@@ -201,7 +206,7 @@ projection.apply({ type: "DayStarted", plantId: "plant-1", timestamp: new DateTi
 projection.apply({ type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable() });
 projection.apply({ type: "DayStarted", plantId: "plant-1", timestamp: new DateTimeImmutable() });
 
-console.log(projection.getPlantsNeedingWater()); 
+console.log(projection.getPlantsNeedingWater());
 // [{ plantId: "plant-1", daysSinceWatering: 3, isAlive: true, ownerId: "me" }]
 
 // Water it
@@ -219,14 +224,14 @@ If your projection gets corrupted or you change its structure, just rebuild it:
 ```typescript
 async function rebuildProjection(eventStore: EventStore): Promise<PlantsNeedingWaterProjection> {
   console.log("Rebuilding projection from event store...");
-  
+
   const projection = new PlantsNeedingWaterProjection();
   const allEvents = await eventStore.getAllEvents();
-  
+
   for (const event of allEvents) {
     projection.apply(event);
   }
-  
+
   console.log(`✓ Projection rebuilt from ${allEvents.length} events`);
   return projection;
 }

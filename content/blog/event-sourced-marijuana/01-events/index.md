@@ -1,8 +1,9 @@
 +++
-title = "Blog"
+title = "Growing Marijuana with Event-Sourcing"
+slug = "events-in-event-sourcing"
 +++
 
-# Growing Marijuana with Event-Sourcing: Introduction (Part 1)
+# Growing Marijuana with Event-Sourcing: Introduction
 
 ## The Story of My Plant
 

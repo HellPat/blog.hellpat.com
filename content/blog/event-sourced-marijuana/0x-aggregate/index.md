@@ -1,4 +1,9 @@
-# Growing Marijuana with Event-Sourcing: Aggregates & Business Logic (Part 2)
++++
+title = "Growing Marijuana with Event-Sourcing: Aggregates & Business Logic"
+draft = true
++++
+
+# Growing Marijuana with Event-Sourcing: Aggregates & Business Logic
 
 *← Back to [Part 1: Introduction](event-sourcing-introduction.md)*
 
@@ -9,7 +14,7 @@ In Event-Sourcing, we reconstruct (reconstitute) the current state by replaying 
 To keep things concrete, we'll start simple and answer one question: how much water did each plant receive? That's our first metric: **total water received**.
 
 ```typescript
-type PlantEvent = 
+type PlantEvent =
   | { type: "Seeded"; plantId: string; ownerId: string; timestamp: DateTimeImmutable }
   | { type: "Watered"; plantId: string; timestamp: DateTimeImmutable }
   | { type: "Trimmed"; plantId: string; timestamp: DateTimeImmutable }
@@ -74,7 +79,7 @@ Now let's answer more questions: Is the plant alive? How many buds does it have?
 We'll extend our aggregate to track additional state:
 
 ```diff
- type PlantEvent = 
+ type PlantEvent =
    | { type: "Seeded"; plantId: string; ownerId: string; timestamp: DateTimeImmutable }
    | { type: "Watered"; plantId: string; timestamp: DateTimeImmutable }
    | { type: "Trimmed"; plantId: string; timestamp: DateTimeImmutable }

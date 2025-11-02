@@ -1,4 +1,9 @@
-# Growing Marijuana with Event-Sourcing: Time Travel (Part 5)
++++
+title = "Growing Marijuana with Event-Sourcing: Time Travel"
+draft = true
++++
+
+# Growing Marijuana with Event-Sourcing: Time Travel
 
 *← Back to [Part 4: Projections](event-sourcing-projections.md)*
 
@@ -26,7 +31,7 @@ With a traditional CRUD system, I'm stuck. The data from 2020 has been overwritt
 Fortunately, I’ve been using Event‑Sourcing. Every event is still in the store:
 
 ```typescript
-type PlantEvent = 
+type PlantEvent =
   | { type: "Seeded"; plantId: string; ownerId: string; timestamp: DateTimeImmutable }
   | { type: "Watered"; plantId: string; timestamp: DateTimeImmutable }
   | { type: "DayStarted"; plantId: string; timestamp: DateTimeImmutable }
@@ -50,7 +55,7 @@ function getStateAtPointInTime(
   const eventsUntilDate = allEvents.filter(
     event => event.timestamp <= targetDate
   );
-  
+
   // Group events by plant
   const eventsByPlant = new Map<string, PlantEvent[]>();
   for (const event of eventsUntilDate) {
@@ -59,7 +64,7 @@ function getStateAtPointInTime(
     }
     eventsByPlant.get(event.plantId)!.push(event);
   }
-  
+
   // Sort each plant's events to ensure deterministic replay, then reconstitute
   for (const events of eventsByPlant.values()) {
     events.sort((a, b) => a.timestamp.compare(b.timestamp));
@@ -71,7 +76,7 @@ function getStateAtPointInTime(
       plantsAtDate.set(plantId, plant);
     }
   }
-  
+
   return plantsAtDate;
 }
 
@@ -114,7 +119,7 @@ const dates = [
 for (const date of dates) {
   const eventsUntilDate = plant42Events.filter(e => e.timestamp <= date);
   const plant = reconstitutePlant(eventsUntilDate);
-  
+
   console.log(`${date.toString()}:`);
   console.log(`  - Alive: ${plant.isAlive}`);
   console.log(`  - Days since watering: ${plant.daysSinceWatering}`);
@@ -163,16 +168,16 @@ function buildProjectionAtPointInTime(
   targetDate: DateTimeImmutable
 ): LivingPlantsProjection {
   const projection = new LivingPlantsProjection();
-  
+
   // Replay only events up to target date
   const eventsUntilDate = allEvents
     .filter(event => event.timestamp <= targetDate)
     .sort((a, b) => a.timestamp.compare(b.timestamp));
-  
+
   for (const event of eventsUntilDate) {
     projection.apply(event);
   }
-  
+
   return projection;
 }
 

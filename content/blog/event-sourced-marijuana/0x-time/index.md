@@ -1,4 +1,9 @@
-# Growing Marijuana with Event-Sourcing: Time is Business Critical (Part 3)
++++
+title = "Growing Marijuana with Event-Sourcing: Time is Business Critical"
+draft = true
++++
+
+# Growing Marijuana with Event-Sourcing: Time is Business Critical
 
 *← Back to [Part 2: Aggregates & Business Logic](event-sourcing-aggregates.md)*
 

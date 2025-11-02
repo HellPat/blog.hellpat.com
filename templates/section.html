@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ section.title }}</title>
+</head>
+<body>
+    <nav>
+        <a href="/">← Home</a>
+    </nav>
+    
+    <h1>{{ section.title }}</h1>
+    
+    {% if section.content %}
+    <div>
+        {{ section.content | safe }}
+    </div>
+    {% endif %}
+    
+    <h2>Articles in this series</h2>
+    
+    <ol>
+    {% for page in section.pages %}
+        <li>
+            <a href="{{ page.permalink }}">{{ page.title }}</a>
+        </li>
+    {% endfor %}
+    </ol>
+</body>
+</html>
