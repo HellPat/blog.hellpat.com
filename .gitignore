@@ -1,0 +1,11 @@
+# Generated CSS
+static/style.css
+
+# Zola build output
+public/
+
+# Node modules
+node_modules/
+
+# npm
+package-lock.json

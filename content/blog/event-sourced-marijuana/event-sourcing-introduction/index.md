@@ -6,7 +6,7 @@ title = "Blog"
 
 ## The Story of My Plant
 
-Three months ago, I planted a marijuana seed in a small pot. I named it "myPlant" and placed it near the window. The first week was exciting—I watered it daily, watched the first leaves sprout, and even took photos to track its growth.
+Three months ago, I planted a marijuana seed in a small pot. I named it "myPlant" and placed it near the window. The first week was exciting — I watered it daily, watched the first leaves sprout, and even took photos to track its growth.
 
 Then life got busy. Work deadlines piled up, I traveled for a week, forgot a few times... you know how it goes. I still watered myPlant when I remembered, but the intervals became irregular. Two weeks would pass, then I'd water it twice in one week, then another long gap.
 
