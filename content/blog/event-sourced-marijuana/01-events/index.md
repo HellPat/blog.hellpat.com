@@ -1,6 +1,8 @@
 +++
 title = "Growing Marijuana with Event-Sourcing"
 slug = "events-in-event-sourcing"
+date = 2025-11-01
+authors = ["Patrick Heller"]
 +++
 
 # Growing Marijuana with Event-Sourcing: Introduction
@@ -12,6 +14,8 @@ Three months ago, I planted a marijuana seed in a small pot. I named it "myPlant
 Then life got busy. Work deadlines piled up, I traveled for a week, forgot a few times... you know how it goes. I still watered myPlant when I remembered, but the intervals became irregular. Two weeks would pass, then I'd water it twice in one week, then another long gap.
 
 Today, I checked on myPlant. The leaves are yellowing, the stem is thin, and it's barely 15cm tall. Something went wrong, but I can't quite remember what. Did I water it enough? When was the last time I watered it? I honestly can't recall the details.
+
+<!-- more -->
 
 ## CRUD: The Traditional Approach
 

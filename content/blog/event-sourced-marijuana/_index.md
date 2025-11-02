@@ -1,6 +1,10 @@
 +++
 title = "Growing Marijuana with Event-Sourcing"
 sort_by = "title"
+generate_feeds = true
+
+[extra]
+author = "Patrick Heller"
 +++
 
 A comprehensive series exploring event-sourcing concepts through the metaphor of growing marijuana plants.

@@ -63,6 +63,9 @@
                     {% if page.date %}
                     <time>{{ page.date }}</time>
                     {% endif %}
+                    {% if page.summary %}
+                    <p>{{ page.summary | striptags }}</p>
+                    {% endif %}
                 </li>
                 {% endfor %} {% endfor %}
             </ul>
