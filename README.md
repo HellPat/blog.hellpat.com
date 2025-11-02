@@ -6,4 +6,4 @@ Welcome to my tech blog where I explore software engineering concepts through pr
 ---
 
 - [Blog](https://blog.hellpat.com/)
-- [Discussions](https://github.com/HellPat/hellpat.github.io/discussions)
+- [Discussions](https://github.com/HellPat/blog.hellpat.com/discussions)
