@@ -5,6 +5,10 @@ date = 2025-11-01
 authors = ["Patrick Heller"]
 +++
 
+CRUD databases store only current state, overwriting history with each update. This makes it impossible to answer "how did we get here?" Event-Sourcing solves this by storing every state change as an immutable event. Learn how my Grandma introduced Event Sourcing to me.
+
+<!-- more -->
+
 # Growing Marijuana with Event-Sourcing: Introduction
 
 ## The Story of My Plant
