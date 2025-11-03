@@ -10,10 +10,7 @@ generate_feeds = true
 author = "Patrick Heller"
 
 [markdown]
-# Whether to do syntax highlighting
-# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-# Disabled because we're using Highlight.js for client-side syntax highlighting
-highlight_code = false
+
 
 [extra]
 # Put all your custom variables here

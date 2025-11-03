@@ -6,10 +6,15 @@
         <title>{{ page.title }}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="/styles.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css"
+        />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
-        <script>hljs.highlightAll();</script>
+        <script>
+            hljs.highlightAll();
+        </script>
         <style>
             /**
              * Hide the summary paragraph on the full article page
@@ -25,9 +30,36 @@
             article.prose pre {
                 border-radius: 0.5rem;
             }
+
+            /**
+             * Style inline code elements
+             */
+            article.prose code:not(pre code) {
+                background-color: rgba(127, 127, 127, 0.2);
+                padding: 0.125rem 0.375rem;
+                border-radius: 0.25rem;
+                font-size: 0.875em;
+            }
+
+            /**
+             * Remove backticks added by prose CSS
+             */
+            article.prose code:not(pre code)::before,
+            article.prose code:not(pre code)::after {
+                content: none;
+            }
+
+            /**
+             * Center images within figures in plant-status
+             */
+            #plant-status figure img {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
         </style>
     </head>
     <body class="max-w-4xl mx-auto p-8">
-        <article class="prose lg:prose-xl">{{ page.content | safe }}</article>
+        <article class="prose">{{ page.content | safe }}</article>
     </body>
 </html>
