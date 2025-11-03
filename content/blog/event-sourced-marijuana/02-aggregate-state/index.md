@@ -1,7 +1,7 @@
 +++
 title = "Reconstitution: recreate Grandmas success"
 slug = "reconstitution-in-event-sourcing"
-date = 2025-11-02T11:00:00Z
+date = 2025-11-01T11:00:00Z
 authors = ["Patrick Heller"]
 +++
 

@@ -1,7 +1,7 @@
 +++
 title = "Time as a business event"
 slug = "time-as-business-event"
-date = 2025-11-02T13:00:00Z
+date = 2025-11-01T13:00:00Z
 authors = ["Patrick Heller"]
 +++
 
