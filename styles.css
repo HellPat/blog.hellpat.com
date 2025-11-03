@@ -3,3 +3,8 @@
 
 @source "./content/**/*.md";
 @source "./templates/**/*.html";
+
+/* Global link styling */
+a {
+  @apply text-blue-600 hover:text-blue-700 underline decoration-1 underline-offset-2 transition-colors;
+}

@@ -1,32 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ section.title }}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
 </head>
-<body>
-    <nav>
-        <a href="/">← Home</a>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto px-6 py-4">
+            <a href="/" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors inline-flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Home
+            </a>
+        </div>
     </nav>
     
-    <h1>{{ section.title }}</h1>
+    <main class="max-w-3xl mx-auto px-6 py-16">
+        <header class="mb-16">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">{{ section.title }}</h1>
+            
+            {% if section.content %}
+            <div class="prose prose-xl prose-gray max-w-none prose-p:text-gray-600 prose-p:leading-relaxed">
+                {{ section.content | safe }}
+            </div>
+            {% endif %}
+        </header>
+        
+        <section class="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-8 md:p-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 pb-4 border-b border-gray-100">Articles in this series</h2>
+            
+            <ol class="space-y-1 list-none pl-0 counter-reset-item">
+            {% for page in section.pages %}
+                <li class="group counter-increment-item">
+                    <a href="{{ page.permalink }}" class="flex items-start gap-6 p-5 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-all">
+                        <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold text-sm group-hover:bg-blue-600 group-hover:text-white transition-all counter-content"></span>
+                        <span class="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors pt-0.5">
+                            {{ page.title }}
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+            </ol>
+        </section>
+    </main>
     
-    {% if section.content %}
-    <div>
-        {{ section.content | safe }}
-    </div>
-    {% endif %}
-    
-    <h2>Articles in this series</h2>
-    
-    <ol>
-    {% for page in section.pages %}
-        <li>
-            <a href="{{ page.permalink }}">{{ page.title }}</a>
-        </li>
-    {% endfor %}
-    </ol>
+    <style>
+        .counter-reset-item { counter-reset: item; }
+        .counter-increment-item { counter-increment: item; }
+        .counter-content::before { content: counter(item); }
+    </style>
 </body>
 </html>

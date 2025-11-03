@@ -5,7 +5,7 @@ date = 2025-11-02
 authors = ["Patrick Heller"]
 +++
 
-My plant died from neglect while Grandma's thrived. With her notebook of events in hand, I decide to replicate her success—like a mad scientist traveling back in time to execute the exact same actions at the exact same moments. By reconstituting state from events, I can replay history step by step and see exactly when success happens.
+My plant died from neglect while Grandma's thrived. Learn how reconstituting state from events lets you replay history and understand success.
 
 <!-- more -->
 

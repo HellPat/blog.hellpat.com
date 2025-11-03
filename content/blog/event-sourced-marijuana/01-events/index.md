@@ -5,7 +5,7 @@ date = 2025-11-01
 authors = ["Patrick Heller"]
 +++
 
-CRUD databases store only the current state, overwriting history with each update. That makes it impossible to answer “How did we get here?” Event‑Sourcing solves this by recording every state change as an immutable event. Learn the fundamental difference between storing snapshots and storing a complete event log, and why event streams enable debugging and insights that CRUD cannot provide.
+CRUD stores only current state, losing history. Event‑Sourcing records every change as an immutable event, enabling you to answer "How did we get here?"
 
 <!-- more -->
 
