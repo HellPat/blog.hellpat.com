@@ -1,7 +1,7 @@
 +++
 title = "Aggregates: enforcing business rules"
 slug = "aggregates-in-event-sourcing"
-date = 2025-11-03
+date = 2025-11-02T12:00:00Z
 authors = ["Patrick Heller"]
 +++
 

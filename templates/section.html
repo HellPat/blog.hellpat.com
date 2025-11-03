@@ -34,13 +34,18 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-8 pb-4 border-b border-gray-100">Articles in this series</h2>
             
             <ol class="space-y-1 list-none pl-0 counter-reset-item">
-            {% for page in section.pages %}
+            {% for page in section.pages | sort(attribute="date") %}
                 <li class="group counter-increment-item">
                     <a href="{{ page.permalink }}" class="flex items-start gap-6 p-5 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-all">
                         <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold text-sm group-hover:bg-blue-600 group-hover:text-white transition-all counter-content"></span>
-                        <span class="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors pt-0.5">
-                            {{ page.title }}
-                        </span>
+                        <div class="flex-1 pt-0.5">
+                            <span class="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors block">
+                                {{ page.title }}
+                            </span>
+                            {% if page.date %}
+                            <time class="text-sm text-gray-500 mt-1 block">{{ page.date | date(format="%B %d, %Y") }}</time>
+                            {% endif %}
+                        </div>
                     </a>
                 </li>
             {% endfor %}

@@ -79,9 +79,14 @@
                 <section>
                     <h2 class="text-3xl font-bold text-gray-900 mb-8 tracking-tight">Latest Articles</h2>
                     <div class="space-y-6">
+                        {% set_global all_pages = [] %}
                         {% for subsection in blog_section.subsections %}
                         {% set sub = get_section(path=subsection) %}
                         {% for page in sub.pages %}
+                        {% set_global all_pages = all_pages | concat(with=page) %}
+                        {% endfor %}
+                        {% endfor %}
+                        {% for page in all_pages | sort(attribute="date") | reverse %}
                         <article class="group bg-white rounded-xl p-8 shadow-md shadow-gray-200/50 hover:shadow-lg hover:shadow-gray-300/50 transition-all border border-gray-100 hover:border-gray-200">
                             {% if page.date %}
                             <time class="text-sm font-medium text-blue-600 block mb-3">{{ page.date }}</time>
@@ -95,7 +100,6 @@
                             <p class="text-gray-600 leading-relaxed">{{ page.summary | striptags }}</p>
                             {% endif %}
                         </article>
-                        {% endfor %}
                         {% endfor %}
                     </div>
                 </section>

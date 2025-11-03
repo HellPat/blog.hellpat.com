@@ -1,7 +1,7 @@
 +++
 title = "Growing Marijuana with Event-Sourcing"
 slug = "events-in-event-sourcing"
-date = 2025-11-01
+date = 2025-11-02T10:00:00Z
 authors = ["Patrick Heller"]
 +++
 
