@@ -7,4 +7,4 @@ build:
 watch:
     #!/usr/bin/env bash
     tailwindcss -i ./styles.css -o ./static/styles.css --watch &
-    zola serve
+    zola serve --drafts
