@@ -1,2 +1,2 @@
 {% set image = resize_image(path=path, width=width, height=height, op=op) %}
-<img src="{{ image.url }}" />
+<img src="{{ image.url }}" width="{{ image.width }}" height="{{ image.height }}" style="aspect-ratio: {{ image.width }} / {{ image.height }};" />
