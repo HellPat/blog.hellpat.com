@@ -13,6 +13,8 @@ My plant died from neglect while Grandma's thrived. With her notebook of events 
 
 ## Understanding success through reconstitution
 
+<img src="image.png" alt="Plant state comparison" style="float: right; margin-left: 1.5rem; margin-bottom: 1rem; max-width: 150px;" />
+
 After `myPlant` died, I stared at Grandma's notebook filled with her meticulous event log. Every watering, every trimming—all timestamped, all recorded.
 
 "What if," I thought, "I could replay her events and see exactly how her plant thrived?"
