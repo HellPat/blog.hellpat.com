@@ -6,6 +6,10 @@
         <title>{{ page.title }}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+        <script>hljs.highlightAll();</script>
         <style>
             /**
              * Hide the summary paragraph on the full article page
@@ -13,6 +17,13 @@
              */
             article.prose > p:first-child {
                 display: none;
+            }
+
+            /**
+             * Ensure code blocks have rounded corners
+             */
+            article.prose pre {
+                border-radius: 0.5rem;
             }
         </style>
     </head>

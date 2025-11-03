@@ -1,0 +1,3 @@
+{%- set data = load_data(path=path) -%} {%- set code_lang = language |
+default(value="typescript") -%}
+<pre><code class="language-{{ code_lang }}">{{ data | safe }}</code></pre>
