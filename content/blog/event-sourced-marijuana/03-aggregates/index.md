@@ -184,3 +184,9 @@ In Part 2, we learned that reconstitution answers "What was the state at any poi
 In Part 3, we learned that aggregates answer "Can I do this action right now?"
 
 **Next:** We've seen how to reconstitute state and validate actions, but in real systems plants need more than just `isAlive`. They track last watering time, health scores, and can die from neglect. In the next part, we'll expand our aggregate to handle more realistic plant care tracking.
+
+---
+
+**Further reading:**
+- [Aggregates in Event Sourcing](https://event-sourcing.patchlevel.io/latest/aggregate/) - Patchlevel documentation on aggregate patterns
+- [Event Sourcing Core Concepts](https://railseventstore.org/docs/core-concepts/event-sourcing) - RailsEventStore guide to event sourcing fundamentals

@@ -136,7 +136,14 @@ Event‑Sourcing provides a fundamentally different approach to managing state:
 - **Event‑Sourcing** stores all events → a complete audit trail; can answer “How did we get here?”
 
 Storing events (Seeded, Watered, Trimmed, Died) lets us:
-1. Answer questions that CRUD cannot (for example, “Why did `myPlant` die?”)
+1. Answer questions that CRUD cannot (for example, "Why did `myPlant` die?")
 2. Understand the complete history of our plants
 3. Derive insights that would be impossible with just a snapshot
 4. **Consistent care matters:** daily watering and regular trimming lead to healthy growth; neglect leads to death
+
+---
+
+**Further reading:**
+- Martin Fowler's foundational article on [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html) provides a comprehensive introduction to the pattern and its applications.
+- Shawn McCool's [CQRS and Event Sourcing course](https://www.youtube.com/playlist?list=PLQuwqoolg4aI6v1GvtRg3NgT0PBBHVqii) - I bought this course back in 2018, but luckily it's now available for free on YouTube.
+
