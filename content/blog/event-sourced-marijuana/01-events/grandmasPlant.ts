@@ -1,5 +1,5 @@
 const grandmasPlantEvents: PlantEvent[] = [
-  { type: "Seeded", plantId: "grandmasPlant", ownerId: "grandma", occured_at: new Date("2023-08-01T10:00:00") },
+  { type: "Seeded", plantId: "grandmasPlant", occured_at: new Date("2023-08-01T10:00:00") },
   { type: "Watered", plantId: "grandmasPlant", occured_at: new Date("2023-08-02T08:30:00") },
   { type: "Watered", plantId: "grandmasPlant", occured_at: new Date("2023-08-03T08:30:00") },
   { type: "Watered", plantId: "grandmasPlant", occured_at: new Date("2023-08-04T08:30:00") },

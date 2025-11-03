@@ -2,7 +2,6 @@ type PlantEvent =
   | {
       type: "Seeded";
       plantId: string;
-      ownerId: string;
       occured_at: Date;
     }
   | { type: "Watered"; plantId: string; occured_at: Date }
