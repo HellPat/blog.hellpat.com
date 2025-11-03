@@ -60,26 +60,109 @@
         </style>
     </head>
     <body class="max-w-4xl mx-auto p-8">
+        {% set parent_section = get_section(path=page.ancestors | last) %} {% if
+        parent_section and parent_section.pages %} {% set sorted_pages =
+        parent_section.pages | sort(attribute="date") %} {% set_global prev_page
+        = false %} {% set_global next_page = false %} {% set_global
+        found_current = false %} {% for p in sorted_pages %} {% if found_current
+        and not next_page %} {% set_global next_page = p %} {% endif %} {% if
+        p.permalink == page.permalink %} {% set_global found_current = true %}
+        {% elif not found_current %} {% set_global prev_page = p %} {% endif %}
+        {% endfor %} {% if prev_page or next_page %}
+        <nav class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex justify-between items-start gap-8">
+                {% if prev_page %}
+                <a href="{{ prev_page.permalink }}" class="group">
+                    <div class="text-sm text-gray-500 mb-2">← Previous</div>
+                    <div
+                        class="text-base font-medium text-gray-900 group-hover:text-blue-600 transition-colors"
+                    >
+                        {{ prev_page.title }}
+                    </div>
+                </a>
+                {% else %}
+                <div></div>
+                {% endif %} {% if next_page %}
+                <a
+                    href="{{ next_page.permalink }}"
+                    class="text-right group ml-auto"
+                >
+                    <div class="text-sm text-gray-500 mb-2">Next →</div>
+                    <div
+                        class="text-base font-medium text-gray-900 group-hover:text-blue-600 transition-colors"
+                    >
+                        {{ next_page.title }}
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %} {% endif %}
+
         <article class="prose">{{ page.content | safe }}</article>
-        
+
+        {% set parent_section = get_section(path=page.ancestors | last) %} {% if
+        parent_section and parent_section.pages %} {% set sorted_pages =
+        parent_section.pages | sort(attribute="date") %} {% set_global
+        prev_page_bottom = false %} {% set_global next_page_bottom = false %} {%
+        set_global found_current_bottom = false %} {% for p in sorted_pages %}
+        {% if found_current_bottom and not next_page_bottom %} {% set_global
+        next_page_bottom = p %} {% endif %} {% if p.permalink == page.permalink
+        %} {% set_global found_current_bottom = true %} {% elif not
+        found_current_bottom %} {% set_global prev_page_bottom = p %} {% endif
+        %} {% endfor %} {% if prev_page_bottom or next_page_bottom %}
+        <nav class="my-20 pt-6 border-t border-gray-200">
+            <div class="flex justify-between items-start gap-8">
+                {% if prev_page_bottom %}
+                <a href="{{ prev_page_bottom.permalink }}" class="group">
+                    <div class="text-sm text-gray-500 mb-2">← Previous</div>
+                    <div
+                        class="text-base font-medium text-gray-900 group-hover:text-blue-600 transition-colors"
+                    >
+                        {{ prev_page_bottom.title }}
+                    </div>
+                </a>
+                {% else %}
+                <div></div>
+                {% endif %} {% if next_page_bottom %}
+                <a
+                    href="{{ next_page_bottom.permalink }}"
+                    class="text-right group ml-auto"
+                >
+                    <div class="text-sm text-gray-500 mb-2">Next →</div>
+                    <div
+                        class="text-base font-medium text-gray-900 group-hover:text-blue-600 transition-colors"
+                    >
+                        {{ next_page_bottom.title }}
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %} {% endif %}
+
         <section class="pt-16">
             <h2 class="text-2xl font-bold mb-4">Comments</h2>
-            <p class="mb-6 text-gray-600">Have questions or suggestions? I'd love to hear from you and help improve this content.</p>
-            <script src="https://giscus.app/client.js"
-                    data-repo="HellPat/blog.hellpat.com"
-                    data-repo-id="R_kgDOQNSuMA"
-                    data-category="General"
-                    data-category-id="DIC_kwDOQNSuMM4CxXX7"
-                    data-mapping="pathname"
-                    data-strict="0"
-                    data-reactions-enabled="1"
-                    data-emit-metadata="0"
-                    data-input-position="bottom"
-                    data-theme="preferred_color_scheme"
-                    data-lang="en"
-                    crossorigin="anonymous"
-                    async>
-            </script>
+            <p class="mb-6 text-gray-600">
+                Have questions or suggestions? I'd love to hear from you and
+                help improve this content.
+            </p>
+            <script
+                src="https://giscus.app/client.js"
+                data-repo="HellPat/blog.hellpat.com"
+                data-repo-id="R_kgDOQNSuMA"
+                data-category="General"
+                data-category-id="DIC_kwDOQNSuMM4CxXX7"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="preferred_color_scheme"
+                data-lang="en"
+                crossorigin="anonymous"
+                async
+            ></script>
         </section>
     </body>
 </html>
